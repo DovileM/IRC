@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace IRC
@@ -13,10 +15,11 @@ namespace IRC
         public string pass;
         public string key;
         private bool _keyClicked;
-        private Socket _server;
+        private TcpClient _server;
+        private NetworkStream _dataStream;
 
 
-        public LoginWindow(Socket s_server)
+        public LoginWindow(TcpClient s_server)
         {
             InitializeComponent();
             _keyClicked = false;
@@ -25,6 +28,7 @@ namespace IRC
             pass = null;
             key = null;
             _server = s_server;
+            _dataStream = _server.GetStream();
         }
 
         private void nickTextBox_TextChanged(object sender, EventArgs e)
@@ -92,7 +96,38 @@ namespace IRC
         private void startButton_Click(object sender, EventArgs e)
         {
             byte[] bytes = new byte[1024];
-            int bytesSent = _server.Send(Encoding.ASCII.GetBytes(nickTextBox.Text));
+            NetworkStream writer = _server.GetStream();
+
+            Console.WriteLine(Reading());
+            //Writing("PASS " + passTextBox.Text + Environment.NewLine);
+            Writing("NICK "+ nickTextBox.Text + Environment.NewLine);
+            Writing("USER guest 0: * " + nickTextBox.Text + Environment.NewLine);
+            string ping = Reading();
+            Console.WriteLine(ping);
+            if (ping.Contains("PING :"))
+            {
+                string[] data = ping.Split(':');
+                Writing("PONG :" + data[1] + Environment.NewLine);
+                Console.WriteLine(Reading());
+            }
+            else
+                Console.WriteLine(Reading());
+        }
+        public string Reading()
+        {
+            byte[] bytes = new byte[1024];
+            StringBuilder data = new StringBuilder();
+            do
+            {
+                int Recvbytes = _dataStream.Read(bytes, 0, bytes.Length);
+                data.Append(Encoding.ASCII.GetString(bytes, 0, Recvbytes));
+            } while (_dataStream.DataAvailable);
+            return data.ToString();
+        }
+
+        private void Writing(string message)
+        {
+            _dataStream.Write(Encoding.ASCII.GetBytes(message),0,message.Length);
         }
     }
 }

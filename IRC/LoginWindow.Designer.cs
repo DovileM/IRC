@@ -156,6 +156,7 @@
             this.passLabel.Size = new System.Drawing.Size(79, 18);
             this.passLabel.TabIndex = 10;
             this.passLabel.Text = "Password:";
+            this.passLabel.Visible = false;
             // 
             // passTextBox
             // 
