@@ -60,6 +60,7 @@ namespace IRC
             {
                 int Recvbytes = reader.Read(bytes, 0, bytes.Length);
                 data.Append(Encoding.ASCII.GetString(bytes, 0, Recvbytes));
+                System.Threading.Thread.Sleep(1000);
             } while (reader.DataAvailable);
             return data.ToString();
         }

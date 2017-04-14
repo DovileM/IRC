@@ -1,6 +1,6 @@
 ﻿namespace IRC
 {
-    partial class MainWindow
+    partial class ChatWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatWindow));
             this.userList = new System.Windows.Forms.ListBox();
             this.message = new System.Windows.Forms.TextBox();
             this.chatList = new System.Windows.Forms.ListBox();

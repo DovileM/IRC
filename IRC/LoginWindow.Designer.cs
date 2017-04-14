@@ -32,7 +32,7 @@
             this.nickLabel = new System.Windows.Forms.Label();
             this.channelLabel = new System.Windows.Forms.Label();
             this.passCheckBox = new System.Windows.Forms.CheckBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.textLabel = new System.Windows.Forms.Label();
             this.nickTextBox = new System.Windows.Forms.TextBox();
             this.channelTextBox = new System.Windows.Forms.TextBox();
             this.keyButton = new System.Windows.Forms.Label();
@@ -41,6 +41,8 @@
             this.startButton = new System.Windows.Forms.Button();
             this.passLabel = new System.Windows.Forms.Label();
             this.passTextBox = new System.Windows.Forms.TextBox();
+            this.nickErrorLabel = new System.Windows.Forms.Label();
+            this.channelErrorLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // nickLabel
@@ -75,15 +77,15 @@
             this.passCheckBox.UseVisualStyleBackColor = true;
             this.passCheckBox.CheckedChanged += new System.EventHandler(this.passCheckBox_CheckedChanged);
             // 
-            // label3
+            // textLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(99, 19);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(184, 20);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "Think of a nickname...";
+            this.textLabel.AutoSize = true;
+            this.textLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textLabel.Location = new System.Drawing.Point(112, 19);
+            this.textLabel.Name = "textLabel";
+            this.textLabel.Size = new System.Drawing.Size(184, 20);
+            this.textLabel.TabIndex = 3;
+            this.textLabel.Text = "Think of a nickname...";
             // 
             // nickTextBox
             // 
@@ -92,7 +94,6 @@
             this.nickTextBox.Name = "nickTextBox";
             this.nickTextBox.Size = new System.Drawing.Size(161, 24);
             this.nickTextBox.TabIndex = 4;
-            this.nickTextBox.TextChanged += new System.EventHandler(this.nickTextBox_TextChanged);
             // 
             // channelTextBox
             // 
@@ -101,7 +102,7 @@
             this.channelTextBox.Name = "channelTextBox";
             this.channelTextBox.Size = new System.Drawing.Size(135, 24);
             this.channelTextBox.TabIndex = 5;
-            this.channelTextBox.TextChanged += new System.EventHandler(this.channelTextBox_TextChanged);
+            this.channelTextBox.Text = "#labas";
             // 
             // keyButton
             // 
@@ -133,7 +134,6 @@
             this.keyTextBox.Size = new System.Drawing.Size(161, 24);
             this.keyTextBox.TabIndex = 8;
             this.keyTextBox.Visible = false;
-            this.keyTextBox.TextChanged += new System.EventHandler(this.keyTextBox_TextChanged);
             // 
             // startButton
             // 
@@ -166,14 +166,39 @@
             this.passTextBox.Size = new System.Drawing.Size(161, 24);
             this.passTextBox.TabIndex = 11;
             this.passTextBox.Visible = false;
-            this.passTextBox.TextChanged += new System.EventHandler(this.passTextBox_TextChanged);
+            // 
+            // nickErrorLabel
+            // 
+            this.nickErrorLabel.AutoSize = true;
+            this.nickErrorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nickErrorLabel.ForeColor = System.Drawing.Color.Crimson;
+            this.nickErrorLabel.Location = new System.Drawing.Point(302, 57);
+            this.nickErrorLabel.Name = "nickErrorLabel";
+            this.nickErrorLabel.Size = new System.Drawing.Size(92, 16);
+            this.nickErrorLabel.TabIndex = 12;
+            this.nickErrorLabel.Text = "*No nickname";
+            this.nickErrorLabel.Visible = false;
+            // 
+            // channelErrorLabel
+            // 
+            this.channelErrorLabel.AutoSize = true;
+            this.channelErrorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.channelErrorLabel.ForeColor = System.Drawing.Color.Crimson;
+            this.channelErrorLabel.Location = new System.Drawing.Point(302, 118);
+            this.channelErrorLabel.Name = "channelErrorLabel";
+            this.channelErrorLabel.Size = new System.Drawing.Size(81, 16);
+            this.channelErrorLabel.TabIndex = 13;
+            this.channelErrorLabel.Text = "*No channel";
+            this.channelErrorLabel.Visible = false;
             // 
             // LoginWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.ClientSize = new System.Drawing.Size(363, 274);
+            this.ClientSize = new System.Drawing.Size(411, 274);
+            this.Controls.Add(this.channelErrorLabel);
+            this.Controls.Add(this.nickErrorLabel);
             this.Controls.Add(this.passTextBox);
             this.Controls.Add(this.passLabel);
             this.Controls.Add(this.startButton);
@@ -182,7 +207,7 @@
             this.Controls.Add(this.keyButton);
             this.Controls.Add(this.channelTextBox);
             this.Controls.Add(this.nickTextBox);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.textLabel);
             this.Controls.Add(this.passCheckBox);
             this.Controls.Add(this.channelLabel);
             this.Controls.Add(this.nickLabel);
@@ -198,7 +223,7 @@
         private System.Windows.Forms.Label nickLabel;
         private System.Windows.Forms.Label channelLabel;
         private System.Windows.Forms.CheckBox passCheckBox;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label textLabel;
         private System.Windows.Forms.TextBox nickTextBox;
         private System.Windows.Forms.TextBox channelTextBox;
         private System.Windows.Forms.Label keyButton;
@@ -207,5 +232,7 @@
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Label passLabel;
         private System.Windows.Forms.TextBox passTextBox;
+        private System.Windows.Forms.Label nickErrorLabel;
+        private System.Windows.Forms.Label channelErrorLabel;
     }
 }
