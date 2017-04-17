@@ -72,8 +72,8 @@ namespace IRC
 
         private void leaveLabel_Click(object sender, EventArgs e)
         {
-            Writing("/partall" + Environment.NewLine);
-            Console.WriteLine(Reading());
+            //Writing("/partall" + Environment.NewLine);
+            //Console.WriteLine(Reading());
 
             //DialogResult = DialogResult.OK;
             Close();

@@ -114,6 +114,8 @@ namespace IRC
                     //Console.WriteLine(Reading());
                     ChatWindow chat = new ChatWindow(_server, nickTextBox.Text, channelTextBox.Text, data[1]);
                     chat.Show();
+                    Console.WriteLine(Reading());
+
                     Hide();
                 }
                 else
