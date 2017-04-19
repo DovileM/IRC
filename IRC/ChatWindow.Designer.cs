@@ -58,7 +58,7 @@
             this.message.Name = "message";
             this.message.Size = new System.Drawing.Size(740, 25);
             this.message.TabIndex = 1;
-            this.message.Text = "Send message...";
+            this.message.KeyDown += new System.Windows.Forms.KeyEventHandler(this.message_TextChanged);
             // 
             // chatList
             // 

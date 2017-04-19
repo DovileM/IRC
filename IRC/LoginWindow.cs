@@ -105,18 +105,14 @@ namespace IRC
                         Writing("JOIN " + channelTextBox.Text + " "+keyTextBox.Text + Environment.NewLine);
                     else
                         Writing("JOIN " + channelTextBox.Text + Environment.NewLine);
-                    string line = Reading();
-                    Console.WriteLine(line);
-                    data = line.Split(new string[] {"353", "366" }, StringSplitOptions.None);
-                    data = data[1].Split(':');
-
-                    //Writing("/NAMES "+channelTextBox.Text + Environment.NewLine);
                     //Console.WriteLine(Reading());
-                    ChatWindow chat = new ChatWindow(_server, nickTextBox.Text, channelTextBox.Text, data[1]);
-                    chat.Show();
-                    Console.WriteLine(Reading());
 
-                    Hide();
+                    using (ChatWindow chat = new ChatWindow(_server, nickTextBox.Text, channelTextBox.Text))
+                    {
+                        Hide();
+                        if (chat.ShowDialog() == DialogResult.OK)
+                            Show();
+                    }
                 }
                 else
                     Console.WriteLine(Reading());
@@ -130,7 +126,7 @@ namespace IRC
             {
                 int Recvbytes = _dataStream.Read(bytes, 0, bytes.Length);
                 data.Append(Encoding.ASCII.GetString(bytes, 0, Recvbytes));
-                System.Threading.Thread.Sleep(2000);
+                System.Threading.Thread.Sleep(1000);
             } while (_dataStream.DataAvailable);
             return data.ToString();
         }

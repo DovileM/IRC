@@ -16,6 +16,7 @@ namespace IRC
         static void Main()
         {
             //Process.Start("https:///kiwiirc.com/server"); 
+
             try
             {
                 TcpClient server = new TcpClient("irc.zebra.lt", 6667);
