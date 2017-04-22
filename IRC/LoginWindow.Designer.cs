@@ -43,6 +43,7 @@
             this.passTextBox = new System.Windows.Forms.TextBox();
             this.nickErrorLabel = new System.Windows.Forms.Label();
             this.channelErrorLabel = new System.Windows.Forms.Label();
+            this.passErrorLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // nickLabel
@@ -131,6 +132,7 @@
             this.keyTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.keyTextBox.Location = new System.Drawing.Point(135, 147);
             this.keyTextBox.Name = "keyTextBox";
+            this.keyTextBox.PasswordChar = '*';
             this.keyTextBox.Size = new System.Drawing.Size(161, 24);
             this.keyTextBox.TabIndex = 8;
             this.keyTextBox.Visible = false;
@@ -163,6 +165,7 @@
             this.passTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.passTextBox.Location = new System.Drawing.Point(135, 113);
             this.passTextBox.Name = "passTextBox";
+            this.passTextBox.PasswordChar = '*';
             this.passTextBox.Size = new System.Drawing.Size(161, 24);
             this.passTextBox.TabIndex = 11;
             this.passTextBox.Visible = false;
@@ -191,12 +194,25 @@
             this.channelErrorLabel.Text = "*No channel";
             this.channelErrorLabel.Visible = false;
             // 
+            // passErrorLabel
+            // 
+            this.passErrorLabel.AutoSize = true;
+            this.passErrorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.passErrorLabel.ForeColor = System.Drawing.Color.Crimson;
+            this.passErrorLabel.Location = new System.Drawing.Point(302, 121);
+            this.passErrorLabel.Name = "passErrorLabel";
+            this.passErrorLabel.Size = new System.Drawing.Size(85, 16);
+            this.passErrorLabel.TabIndex = 14;
+            this.passErrorLabel.Text = "*Invalid pass";
+            this.passErrorLabel.Visible = false;
+            // 
             // LoginWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.ClientSize = new System.Drawing.Size(411, 274);
+            this.ClientSize = new System.Drawing.Size(433, 274);
+            this.Controls.Add(this.passErrorLabel);
             this.Controls.Add(this.channelErrorLabel);
             this.Controls.Add(this.nickErrorLabel);
             this.Controls.Add(this.passTextBox);
@@ -234,5 +250,6 @@
         private System.Windows.Forms.TextBox passTextBox;
         private System.Windows.Forms.Label nickErrorLabel;
         private System.Windows.Forms.Label channelErrorLabel;
+        private System.Windows.Forms.Label passErrorLabel;
     }
 }

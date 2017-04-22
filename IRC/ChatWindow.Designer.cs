@@ -295,6 +295,7 @@
             this.Controls.Add(this.usersList);
             this.Name = "ChatWindow";
             this.Text = "Internet Relay Chat";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatWindow_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 
