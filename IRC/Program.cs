@@ -1,12 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Diagnostics;
-using System.IO;
 using System.Windows.Forms;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace IRC
 {
@@ -18,50 +15,20 @@ namespace IRC
         [STAThread]
         static void Main()
         {
-
-            byte[] bytes = new byte[1024];
+            //Process.Start("https:///kiwiirc.com/server"); 
 
             try
             {
-                IPHostEntry ipHostInfo = Dns.GetHostEntry("irc.zebra.lt");
-                IPAddress ipAddress = ipHostInfo.AddressList[0];
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, 6667);
-
-                Socket server = new Socket(AddressFamily.InterNetwork,
-                    SocketType.Stream, ProtocolType.Tcp);
-
+                TcpClient server = new TcpClient("irc.zebra.lt", 6667);
                 try
                 {
-                    server.Connect(remoteEP);
+                    Console.WriteLine("Socket connected to {0}", server.Client.RemoteEndPoint.ToString());
+                    Console.WriteLine(Reading(server));
 
-                    Console.WriteLine("Socket connected to {0}",
-                        server.RemoteEndPoint.ToString());
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new LoginWindow(server));
 
-                    Console.WriteLine("...1....");
-                    int bytesRec = server.Receive(bytes);
-                    Console.WriteLine(Encoding.ASCII.GetString(bytes, 0, bytesRec));
-
-                    //Application.EnableVisualStyles();
-                    //Application.SetCompatibleTextRenderingDefault(false);
-                    //Application.Run(new LoginWindow(server));
-                    Console.WriteLine("----1-----");
-                    int bytesSent = server.Send(Encoding.ASCII.GetBytes("NICK niuksa"+Environment.NewLine));
-                    Console.WriteLine(".......1...... " + bytesSent);
-
-                    Console.WriteLine("-----2----");
-                    bytesSent = server.Send(Encoding.ASCII.GetBytes("USER guest 0: * niuksa" + Environment.NewLine));
-                    Console.WriteLine(".......2...... " + bytesSent);
-                    //bytes = Enumerable.Repeat((byte)0, 1024).ToArray();
-                    bytesRec = server.Receive(bytes);
-                    Console.WriteLine(Encoding.ASCII.GetString(bytes));
-                    //bytes = Enumerable.Repeat((byte)0, 1024).ToArray();
-                    bytesRec = server.Receive(bytes);
-                    Console.WriteLine(Encoding.ASCII.GetString(bytes));
-                    //bytes = Enumerable.Repeat((byte)0, 1024).ToArray();
-                    bytesRec = server.Receive(bytes);
-                    Console.WriteLine(Encoding.ASCII.GetString(bytes));
-
-                    server.Shutdown(SocketShutdown.Both);
                     server.Close();
                 }
                 catch (ArgumentNullException ane)
@@ -83,39 +50,20 @@ namespace IRC
                 Console.WriteLine(e.ToString());
             }
 
-
-
-            /*Process.Start("https:///kiwiirc.com/server");*/
-
             Console.ReadKey();
         }
-
-        private static void ReadingFromSocket(Socket server)
+        public static string Reading(TcpClient server)
         {
             byte[] bytes = new byte[1024];
-            bool exit = false;
-            while(exit != true)
+            NetworkStream reader = server.GetStream();
+            StringBuilder data = new StringBuilder();
+            do
             {
-                List<Socket> serverSocket = new List<Socket>() { server };
-                bytes = Enumerable.Repeat((byte)0, 1024).ToArray();
-                if (serverSocket.Any())
-                {
-                    try
-                    {
-                        Socket.Select(serverSocket, null, null, 5);
-                        int bytesRec = server.Receive(bytes);
-                        Console.WriteLine("{0}", Encoding.ASCII.GetString(bytes, 0, bytesRec));
-                    }
-                    catch
-                    {
-
-                    }
-                }
-                else
-                    exit = true;
-                
-            }
-
+                int Recvbytes = reader.Read(bytes, 0, bytes.Length);
+                data.Append(Encoding.ASCII.GetString(bytes, 0, Recvbytes));
+                System.Threading.Thread.Sleep(1000);
+            } while (reader.DataAvailable);
+            return data.ToString();
         }
     }
 }
