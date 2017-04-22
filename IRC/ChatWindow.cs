@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace IRC
@@ -16,9 +11,9 @@ namespace IRC
     {
         private string _nickname;
         private TcpClient _server;
-        private List<string> users;
         private NetworkStream _dataStream;
         private Thread chatThread;
+        private bool runningChat;
 
 
         public ChatWindow(TcpClient server, string nick, string channel)
@@ -27,21 +22,15 @@ namespace IRC
             _server = server;
             _nickname = nick;
             _dataStream = _server.GetStream();
-            UserList();
             channelButton.Text = channel;
             nickButton.Text = nick;
+            runningChat = true;
             chatThread = new Thread(new ThreadStart(ChatThread));
             chatThread.Start();
 
         }
 
         private void infoLabel_Click(object sender, EventArgs e)
-        {
-            UserList();
-            Thread.Sleep(3000);
-        }
-
-        private void channelButton_Click(object sender, EventArgs e)
         {
 
         }
@@ -51,32 +40,47 @@ namespace IRC
             Writing("QUIT :" + channelButton.Text + Environment.NewLine);
             _nickname = string.Empty;
             _server = null;
-            users = null;
             _dataStream = null;
+            runningChat = false;
+            chatThread.Join();
             DialogResult = DialogResult.OK;
             Close();
-
         }
 
         public string Reading()
         {
             byte[] bytes = new byte[1024];
             StringBuilder data = new StringBuilder();
-            Console.WriteLine("GALI SKAITYT: " + _dataStream.DataAvailable);
-            if (_dataStream.DataAvailable)
+            try
             {
-                do
+                Console.WriteLine("GALI SKAITYT: " + _dataStream.DataAvailable);
+                if (_dataStream.DataAvailable)
                 {
-                    int Recvbytes = _dataStream.Read(bytes, 0, bytes.Length);
-                    data.Append(Encoding.ASCII.GetString(bytes, 0, Recvbytes));
-                    Thread.Sleep(1000);
-                } while (_dataStream.DataAvailable);
-                Console.WriteLine(data.ToString()+ Environment.NewLine);
-                return data.ToString();
+                    try
+                    {
+                        do
+                        {
+                            int Recvbytes = _dataStream.Read(bytes, 0, bytes.Length);
+                            data.Append(Encoding.ASCII.GetString(bytes, 0, Recvbytes));
+                            Thread.Sleep(750);
+                        } while (_dataStream.DataAvailable);
+                        return data.ToString();
+                    }
+                    catch (NullReferenceException ex)
+                    {
+                        Console.WriteLine("EXCEPTION: " + ex.Message);
+                        return string.Empty;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("NE");
+                    return string.Empty;
+                }
             }
-            else
+            catch (NullReferenceException ex)
             {
-                Console.WriteLine("NE");
+                Console.WriteLine("EXCEPTION: " + ex.Message);
                 return string.Empty;
             }
         }
@@ -84,28 +88,29 @@ namespace IRC
         private void Writing(string message)
         {
             _dataStream.Write(Encoding.ASCII.GetBytes(message), 0, message.Length);
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
         }
 
         private void UserList()
         {
             Writing("NAMES :" + channelButton.Text + Environment.NewLine);
+            Thread.Sleep(500);
             string line = Reading();
-            Console.WriteLine(line);
             if (!string.IsNullOrEmpty(line))
             {
-                usersList.Items.Clear();
-
-                string[] data = line.Split(new string[] { "353", "366" }, StringSplitOptions.None);
-                data = data[1].Split(':');
-                data = data[1].Split(' ');
-                users = new List<string>();
-                for (int i = 0; i < data.Length; i++)
+                if (usersList.InvokeRequired)
                 {
-                    users.Add(data[i]);
-                    usersList.Items.Add(data[i]);
+                    usersList.Invoke(new Action(() => usersList.Items.Clear()));
+
+                    string[] data = line.Split(new string[] { "353", "366" }, StringSplitOptions.None);
+                    data = data[1].Split(':')[1].Split(' ');
+                    for (int i = 0; i < data.Length-1; i++)
+                    {
+                        usersList.Invoke(new Action(() => usersList.Items.Add(data[i])));
+                    }
+                    if (usersLabel.InvokeRequired)
+                        usersLabel.Invoke(new Action(() => usersLabel.Text = string.Format("{0} Users", (data.Length - 1))));
                 }
-                usersLabel.Text = string.Format("{0} Users", users.Count - 1);
             }
         }
 
@@ -114,65 +119,152 @@ namespace IRC
             if (e.KeyCode == Keys.Enter)
             {
                 message_ClickedEnter(this, new EventArgs());
+
             }
         }
 
         private void message_ClickedEnter(object sender, EventArgs e)
         {
+            if (message.Text.Contains(Environment.NewLine))
+                message.Text = message.Text.Remove(0, 2);
             Writing("PRIVMSG " + channelButton.Text + " :" + message.Text + Environment.NewLine);
             string line = Reading();
-            Console.WriteLine(line);
-            chatList.Items.Add(DateTime.Now.ToLongTimeString() + string.Format("{0,15}", nickButton.Text) + ":    " + message.Text);
+            chatList.Items.Add(DateTime.Now.ToLongTimeString() + string.Format("      {0}", nickButton.Text) + ":    " + message.Text);
+            chatList.TopIndex = chatList.Items.Count - 1;
             message.Text = string.Empty;
         }
 
         private void ChatThread()
         {
-            while (true)
+            UserList();
+            while (runningChat)
             {
-                Thread.Sleep(1000);
-                string line = Reading();
-                if (line.Contains("PRIVMSG"))
+                string[] lines = Reading().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
                 {
-                    string str = "PRIVMSG " + channelButton.Text + " :";
-                    string[] data = line.Split(new string[] { str }, StringSplitOptions.None);
-                    Console.WriteLine("DATA1: " + data[0]);
-                    Console.WriteLine("DATA2: " + data[1]);
-                    string senderNick = data[0].Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
-
-                    if (chatList.InvokeRequired)
+                    if (line.Contains("PRIVMSG"))
                     {
-                        chatList.Invoke(new Action(() => chatList.Items.Add(DateTime.Now.ToLongTimeString() +
-                                                        string.Format("{0,15}", senderNick) + ":    " + data[1])));
-
-                        Thread.Sleep(1000);
-
+                        if (line.Contains("PRIVMSG " + channelButton.Text + " :"))
+                        {
+                            string[] data = line.Split(new string[] { "PRIVMSG " + channelButton.Text + " :" }, StringSplitOptions.None);
+                            string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
+                            AddItemToList(string.Format("      {0}:  {1}", senderNick, data[1]));
+                        }
+                        else
+                        {
+                            string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
+                            string receiverNick = line.Split(new string[] { "PRIVMSG ", " :" }, StringSplitOptions.None)[1];
+                            string message = line.Split(new string[] { "PRIVMSG " + receiverNick + " :" }, StringSplitOptions.None)[1];
+                            if(receiverNick.Equals(nickButton.Text))
+                                AddItemToList(string.Format("      PM send from {0} to {1}: {2}", senderNick, receiverNick, message));
+                        }
                     }
-                }
-                else if(line.Contains("JOIN"))
-                {
-                    string str = "JOIN " + " :"+ channelButton.Text;
-                    //string[] data = line.Split(new string[] { str }, StringSplitOptions.None);
-                    //Console.WriteLine("DATA1: " + data[0]);
-                    //Console.WriteLine("DATA2: " + data[1]);
-                    string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
-
-                    if (chatList.InvokeRequired)
+                    else if (line.Contains("JOIN"))
                     {
-                        chatList.Invoke(new Action(() => chatList.Items.Add(DateTime.Now.ToLongTimeString() +
-                                                        string.Format("{0,15}", senderNick) + ": has joined to chat.")));
-
-                        Thread.Sleep(1000);
-
+                        string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
+                        UserList();
+                        AddItemToList(string.Format("    ← {0} has joined.", senderNick));
                     }
-                }
-                else if (line.Contains("PART"))
-                {
-
+                    else if (line.Contains("PART"))
+                    {
+                        string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
+                        UserList();
+                        AddItemToList(string.Format("    → {0} has quit.", senderNick));
+                    }
+                    else if (line.Contains("NICK"))
+                    {
+                        string[] data = line.Split(new string[] { "NICK :" }, StringSplitOptions.None);
+                        string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
+                        AddItemToList(string.Format("      {0} is known as {1}", senderNick, data[1]));
+                        UserList();
+                    }
+                    else if (line.Contains("353"))
+                    {
+                        string[] data = line.Split(new string[] { channelButton.Text + " :"}, StringSplitOptions.None);
+                        data = data[1].Split(' ');
+                        if(usersComboBox.InvokeRequired)
+                            if (usersComboBox.Visible)
+                                for (int i = 0; i < data.Length - 1; i++)
+                                    usersComboBox.Invoke(new Action(() => usersComboBox.Items.Add(data[i])));
+                    }
+                    else if (line.Contains("PING"))
+                    {
+                        string[] data = line.Split(':');
+                        Writing("PONG :" + data[1] + Environment.NewLine);
+                    }
                 }
             }
         }
 
+        private void AddItemToList(string line)
+        {
+            if (chatList.InvokeRequired)
+                chatList.Invoke(new Action(() => { chatList.Items.Add(DateTime.Now.ToLongTimeString() + line); chatList.TopIndex = chatList.Items.Count - 1; }));
+        }
+
+        private void nickButton_Click(object sender, EventArgs e)
+        {
+            cancelLabel_Click(sender, e);
+            msgCancelLabel_Click(sender, e);
+            newNickTextBox.Visible = true;
+            nickLabel.Visible = true;
+            cancelLabel.Visible = true;
+            changeButton.Visible = true;
+            nickBorder.Visible = true;
+        }
+
+        private void cancelLabel_Click(object sender, EventArgs e)
+        {
+            newNickTextBox.Text = string.Empty;
+            newNickTextBox.Visible = false;
+            nickBorder.Visible = false;
+            nickLabel.Visible = false;
+            cancelLabel.Visible = false;
+            changeButton.Visible = false;
+        }
+
+        private void changeButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(newNickTextBox.Text))
+            {
+                message.Text = string.Empty;
+                nickButton.Text = newNickTextBox.Text;
+                Writing("NICK " + newNickTextBox.Text + Environment.NewLine);
+                cancelLabel_Click(sender, e);
+            }
+        }
+
+        private void privateMsgButton_Click(object sender, EventArgs e)
+        {
+            cancelLabel_Click(sender, e);
+            msgCancelLabel_Click(sender, e);
+            msgCancelLabel.Visible = true;
+            msgLabel.Visible = true;
+            sendButton.Visible = true;
+            usersComboBox.Visible = true;
+            msgBorder.Visible = true;
+            Writing("NAMES :" + channelButton.Text + Environment.NewLine);
+        }
+
+        private void msgCancelLabel_Click(object sender, EventArgs e)
+        {
+            usersComboBox.Items.Clear();
+            msgCancelLabel.Visible = false;
+            msgLabel.Visible = false;
+            sendButton.Visible = false;
+            usersComboBox.Visible = false;
+            msgBorder.Visible = false;
+        }
+
+        private void sendButton_Click(object sender, EventArgs e)
+        {
+            if (message.Text.Contains(Environment.NewLine))
+                message.Text = message.Text.Remove(0, 2);
+            chatList.Items.Add(string.Format(DateTime.Now.ToLongTimeString() + "      PM send from {0} to {1}: {2}", 
+                                nickButton.Text, usersComboBox.SelectedItem.ToString(), message.Text));
+            Writing("PRIVMSG " + usersComboBox.SelectedItem.ToString() + " :" + message.Text + Environment.NewLine);
+            message.Text = string.Empty;
+        }
     }
 }
 
