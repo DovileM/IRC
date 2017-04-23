@@ -108,6 +108,18 @@ namespace IRC
                 Writing("USER guest * * :" + nickTextBox.Text + Environment.NewLine);
                 string ping = Reading();
                 Console.WriteLine(ping);
+                if (ping.Contains("433"))
+                {
+                    nickErrorLabel.Visible = true;
+                    nickErrorLabel.Text = "*Nick already in use";
+                    Trace.WriteLine(ping);
+
+                }
+                if (ping.Contains("461"))
+                {
+                    passErrorLabel.Visible = true;
+                    Trace.WriteLine(ping);
+                }
                 if (ping.Contains("PING :"))
                 {
                     string[] data = ping.Split(new string[] { "PING :" }, StringSplitOptions.None);
@@ -124,18 +136,6 @@ namespace IRC
                         if (chat.ShowDialog() == DialogResult.OK)
                             Show();
                     }
-                }
-                if (ping.Contains("433"))
-                {
-                    nickErrorLabel.Visible = true;
-                    nickErrorLabel.Text = "*Nick already in use";
-                    Trace.WriteLine(ping);
-
-                }
-                if (ping.Contains("461"))
-                {
-                    passErrorLabel.Visible = true;
-                    Trace.WriteLine(ping);
                 }
             }
         }

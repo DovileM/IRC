@@ -111,10 +111,7 @@ namespace IRC
         private void message_TextChanged(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
-            {
                 message_ClickedEnter(this, new EventArgs());
-
-            }
         }
 
         private void message_ClickedEnter(object sender, EventArgs e)
@@ -159,7 +156,7 @@ namespace IRC
                         UserList();
                         AddItemToList(string.Format("    ← {0} has joined.", senderNick));
                     }
-                    else if (line.Contains("PART"))
+                    else if (line.Contains("PART") || line.Contains("QUIT"))
                     {
                         string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
                         UserList();
@@ -186,6 +183,8 @@ namespace IRC
                         string[] data = line.Split(':');
                         Writing("PONG :" + data[1] + Environment.NewLine);
                     }
+                    else if (line.Contains("421") || line.Contains("366"))
+                        continue;
                     else
                         Trace.WriteLine(line);
                 }
