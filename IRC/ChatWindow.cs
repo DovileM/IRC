@@ -37,12 +37,6 @@ namespace IRC
 
         private void leaveLabel_Click(object sender, EventArgs e)
         {
-            Writing("QUIT :" + channelButton.Text + Environment.NewLine);
-            _nickname = string.Empty;
-            _server = null;
-            _dataStream = null;
-            runningChat = false;
-            chatThread.Join();
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -117,10 +111,7 @@ namespace IRC
         private void message_TextChanged(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
-            {
                 message_ClickedEnter(this, new EventArgs());
-
-            }
         }
 
         private void message_ClickedEnter(object sender, EventArgs e)
@@ -155,7 +146,7 @@ namespace IRC
                             string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
                             string receiverNick = line.Split(new string[] { "PRIVMSG ", " :" }, StringSplitOptions.None)[1];
                             string message = line.Split(new string[] { "PRIVMSG " + receiverNick + " :" }, StringSplitOptions.None)[1];
-                            if(receiverNick.Equals(nickButton.Text))
+                            if (receiverNick.Equals(nickButton.Text))
                                 AddItemToList(string.Format("      PM send from {0} to {1}: {2}", senderNick, receiverNick, message));
                         }
                     }
@@ -165,7 +156,7 @@ namespace IRC
                         UserList();
                         AddItemToList(string.Format("    ← {0} has joined.", senderNick));
                     }
-                    else if (line.Contains("PART"))
+                    else if (line.Contains("PART") || line.Contains("QUIT"))
                     {
                         string senderNick = line.Split(new string[] { ":", "!" }, StringSplitOptions.None)[1];
                         UserList();
@@ -180,9 +171,9 @@ namespace IRC
                     }
                     else if (line.Contains("353"))
                     {
-                        string[] data = line.Split(new string[] { channelButton.Text + " :"}, StringSplitOptions.None);
+                        string[] data = line.Split(new string[] { channelButton.Text + " :" }, StringSplitOptions.None);
                         data = data[1].Split(' ');
-                        if(usersComboBox.InvokeRequired)
+                        if (usersComboBox.InvokeRequired)
                             if (usersComboBox.Visible)
                                 for (int i = 0; i < data.Length - 1; i++)
                                     usersComboBox.Invoke(new Action(() => usersComboBox.Items.Add(data[i])));
@@ -192,6 +183,10 @@ namespace IRC
                         string[] data = line.Split(':');
                         Writing("PONG :" + data[1] + Environment.NewLine);
                     }
+                    else if (line.Contains("421") || line.Contains("366"))
+                        continue;
+                    else
+                        Trace.WriteLine(line);
                 }
             }
         }
@@ -225,7 +220,7 @@ namespace IRC
 
         private void changeButton_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(newNickTextBox.Text))
+            if (!string.IsNullOrEmpty(newNickTextBox.Text) && newNickTextBox.Text.Length < 9)
             {
                 message.Text = string.Empty;
                 nickButton.Text = newNickTextBox.Text;
@@ -264,6 +259,16 @@ namespace IRC
                                 nickButton.Text, usersComboBox.SelectedItem.ToString(), message.Text));
             Writing("PRIVMSG " + usersComboBox.SelectedItem.ToString() + " :" + message.Text + Environment.NewLine);
             message.Text = string.Empty;
+        }
+
+        private void ChatWindow_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Writing("QUIT :" + channelButton.Text + Environment.NewLine);
+            runningChat = false;
+            chatThread.Join();
+            _nickname = string.Empty;
+            _server = null;
+            _dataStream = null;
         }
     }
 }

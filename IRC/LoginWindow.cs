@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
@@ -32,6 +33,7 @@ namespace IRC
                 keyButton.Location = new Point(268,147);
                 keyLabel.Location = new Point(54,183);
                 keyTextBox.Location = new Point(135,177);
+                channelErrorLabel.Location = new Point(302,155);
             }
             else
             {
@@ -43,6 +45,7 @@ namespace IRC
                 keyButton.Location = new Point(268, 113);
                 keyLabel.Location = new Point(54, 153);
                 keyTextBox.Location = new Point(135, 147);
+                channelErrorLabel.Location = new Point(302, 118);
             }
         }
 
@@ -70,12 +73,15 @@ namespace IRC
 
             nickErrorLabel.Visible = false;
             channelErrorLabel.Visible = false;
-
+            passErrorLabel.Visible = false;
 
             if (string.IsNullOrEmpty(nickTextBox.Text) || string.IsNullOrEmpty(channelTextBox.Text))
             {
                 if (string.IsNullOrEmpty(nickTextBox.Text))
+                {
                     nickErrorLabel.Visible = true;
+                    nickErrorLabel.Text = "*No nickname";
+                }
                 if (string.IsNullOrEmpty(channelTextBox.Text))
                 {
                     channelErrorLabel.Text = "*No channel";
@@ -83,29 +89,46 @@ namespace IRC
                 }
             }
             else if (!channelTextBox.Text.Contains("#"))
-            {
-                channelErrorLabel.Text = "*Invalid channel";
-                channelErrorLabel.Visible = true;
-            }
+                {
+                    channelErrorLabel.Text = "*Invalid channel";
+                    channelErrorLabel.Visible = true;
+                }
+            else if (nickTextBox.Text.Length > 9)
+                {
+                    nickErrorLabel.Visible = true;
+                    nickErrorLabel.Text = "*Invalid nickname";
+                }
             else
             {
-                Console.WriteLine(Reading());
-                if(passCheckBox.Checked && string.IsNullOrEmpty(passTextBox.Text))
+                if (passCheckBox.Checked && !string.IsNullOrEmpty(passTextBox.Text) && passTextBox.Text.Length < 9)
                     Writing("PASS " + passTextBox.Text + Environment.NewLine);
+                else
+                    passErrorLabel.Visible = true;
                 Writing("NICK " + nickTextBox.Text + Environment.NewLine);
                 Writing("USER guest * * :" + nickTextBox.Text + Environment.NewLine);
                 string ping = Reading();
                 Console.WriteLine(ping);
+                if (ping.Contains("433"))
+                {
+                    nickErrorLabel.Visible = true;
+                    nickErrorLabel.Text = "*Nick already in use";
+                    Trace.WriteLine(ping);
+
+                }
+                if (ping.Contains("461"))
+                {
+                    passErrorLabel.Visible = true;
+                    Trace.WriteLine(ping);
+                }
                 if (ping.Contains("PING :"))
                 {
-                    string[] data = ping.Split(':');
+                    string[] data = ping.Split(new string[] { "PING :" }, StringSplitOptions.None);
                     Writing("PONG :" + data[1] + Environment.NewLine);
                     Console.WriteLine(Reading());
                     if (string.IsNullOrEmpty(keyTextBox.Text))
-                        Writing("JOIN " + channelTextBox.Text + " "+keyTextBox.Text + Environment.NewLine);
+                        Writing("JOIN " + channelTextBox.Text + " " + keyTextBox.Text + Environment.NewLine);
                     else
                         Writing("JOIN " + channelTextBox.Text + Environment.NewLine);
-                    //Console.WriteLine(Reading());
 
                     using (ChatWindow chat = new ChatWindow(_server, nickTextBox.Text, channelTextBox.Text))
                     {
@@ -114,8 +137,6 @@ namespace IRC
                             Show();
                     }
                 }
-                else
-                    Console.WriteLine(Reading());
             }
         }
         public string Reading()
@@ -135,5 +156,7 @@ namespace IRC
         {
             _dataStream.Write(Encoding.ASCII.GetBytes(message),0,message.Length);
         }
+
+
     }
 }
