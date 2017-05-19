@@ -47,7 +47,7 @@ namespace IRC
             StringBuilder data = new StringBuilder();
             try
             {
-                Console.WriteLine("GALI SKAITYT: " + _dataStream.DataAvailable);
+                //Console.WriteLine("GALI SKAITYT: " + _dataStream.DataAvailable);
                 if (_dataStream.DataAvailable)
                 {
                     try
@@ -62,19 +62,19 @@ namespace IRC
                     }
                     catch (NullReferenceException ex)
                     {
-                        Console.WriteLine("EXCEPTION: " + ex.Message);
+                        Trace.WriteLine("EXCEPTION: " + ex.Message);
                         return string.Empty;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("NE");
+                    //Console.WriteLine("NE");
                     return string.Empty;
                 }
             }
             catch (NullReferenceException ex)
             {
-                Console.WriteLine("EXCEPTION: " + ex.Message);
+                Trace.WriteLine("EXCEPTION: " + ex.Message);
                 return string.Empty;
             }
         }

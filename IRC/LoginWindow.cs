@@ -100,7 +100,7 @@ namespace IRC
                 }
             else
             {
-                if (passCheckBox.Checked && !string.IsNullOrEmpty(passTextBox.Text) && passTextBox.Text.Length < 9)
+                if (passCheckBox.Checked && !string.IsNullOrEmpty(passTextBox.Text) || passTextBox.Text.Length < 9)
                     Writing("PASS " + passTextBox.Text + Environment.NewLine);
                 else
                     passErrorLabel.Visible = true;
@@ -112,12 +112,6 @@ namespace IRC
                 {
                     nickErrorLabel.Visible = true;
                     nickErrorLabel.Text = "*Nick already in use";
-                    Trace.WriteLine(ping);
-
-                }
-                if (ping.Contains("461"))
-                {
-                    passErrorLabel.Visible = true;
                     Trace.WriteLine(ping);
                 }
                 if (ping.Contains("PING :"))

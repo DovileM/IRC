@@ -49,8 +49,6 @@ namespace IRC
             {
                 Console.WriteLine(e.ToString());
             }
-
-            Console.ReadKey();
         }
         public static string Reading(TcpClient server)
         {

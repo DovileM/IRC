@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3386B352-58A8-4C01-8257-3FE1C33A99F8}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>IRC</RootNamespace>
     <AssemblyName>IRC</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
